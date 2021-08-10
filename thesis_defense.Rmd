@@ -15,9 +15,9 @@ output:
 
 ```{r setup, include=FALSE}
 library(knitr)
+library(xaringanExtra)
 opts_chunk$set(echo = FALSE, eval=TRUE)
-xaringanExtra::use_freezeframe()
-
+use_freezeframe(trigger = "click", overlay = TRUE)
 ```
 ---
 # Overview
@@ -93,8 +93,6 @@ I'll begin by illustrating the degree to which interpatient variability is unexp
 
 - 10 patients are being inducted into general anesthesia with propofol 
 
---
-
 - Model* adjusts dosage for sex, age, BMI
 
 .footnote[*Eleveld et al. (2018) population PK-PD model]
@@ -111,8 +109,6 @@ knitr::include_graphics("images/BIS_example.jpeg")
 --
 
 - Doses are calculated a target of BIS=50 (40-60 are acceptable)
-
---
 
 - Avoid overshoot (BIS<40), delays, excessive medication 
 
@@ -151,7 +147,7 @@ So what are we seeing here...?
 
 
 ---
-## Background - Closed-loop control
+## Closed-loop control
 
 - Feedback from a patient (e.g., BIS) are collected in real time (1 obs/10 sec)
 
@@ -236,32 +232,30 @@ knitr::include_graphics("images/Syringe_pump.jpeg")
 
 --
 
+- A range of functions could be selected
+
+--
+
+- Flexible, low-dimensional, montonically decreasing: exponential and sigmoidal
+
+--
+
+- Can allow for initial bolus, followed by gradual infusions by varying y-intercept
+
+
+---
+## Optimal reference function
+
 - Approached as an optimal design of experiments problem
 
 --
 
 - Asks *"how best can can I, the experimenter, select inputs into a system to achieve a desired outcome."*
 
-
-- The input that we can modify is the set of targets (i.e., a procedure for determining infusion rates)
-
-
----
-## Optimal reference function: functional form
-
-- A range of functions could be selected
-
 --
 
-- Flexible, low-dimensional, montonically decreasing
+- Each parameter set defines a different the set of targets and a different procedure for determining infusion rates
 
---
-
-- Exponential and sigmoidal functions fit criteria
-
---
-
-- Can allow for initial bolus, followed by gradual infusions by varying y-intercept
 
 ---
 ## Optimal reference function
@@ -271,7 +265,7 @@ knitr::include_graphics("images/Syringe_pump.jpeg")
 --
 
 .center[
-```{r, objective-functions, out.width = 400, out.height = 300}
+```{r, objective-functions, out.width = 375, out.height = 300}
 knitr::include_graphics("./images/objective_functions.jpeg")
 ```
 ]
@@ -293,13 +287,11 @@ knitr::include_graphics("./images/objective_functions.jpeg")
 
 --
 
-- As the the reference function changes, so does the distribution of values
+- As the the reference function parameters change, so does the distribution of values
 
 --
 
-- We select the reference function to optimize some characteristic of the distribution
-
---
+- We optimize the reference function parameters to minimize some characteristic of this distribution:
 
 - 1) Average stable entry time, 2) variance of stable entry time, 3) average dose
 
@@ -428,7 +420,7 @@ knitr::include_graphics("./images/dose-difference.jpeg")
 
 **Highlights**
 
-1. New approach to considering clinical objectives in presence of interpatient PK-PD variability
+1. Framework for optimizing clinical objectives in presence of interpatient PK-PD variability
 
 --
 
@@ -448,37 +440,29 @@ knitr::include_graphics("./images/dose-difference.jpeg")
 
 **Limitations**
 
-1. Reference function will be suboptimal if population is not adequately described by population PK-PD model (e.g., interpatient variability estimates are inaccurate, sources of variability beyond model)
+1. Suboptimal if population is not adequately described by population PK-PD model
 
 --
 
 2. Performance may vary for different controllers
 
---
 
-3. Optimization process is computationally intensive, **but...**
+3. Optimization process is computationally intensive
 
---
-
-- May not be as bad for all controllers (i.e., those that don't require posterior estimation)
 
 ---
 ## TCI software package
 
 1. Implements TCI algorithms to identify infusion rates
 
---
-
-2. Simulates patient data from PK or PK-PD models given dosing schedules
-
---
+2. Simulates patient responses
 
 3. Allows for feedback through closed-loop control
 
 ---
 ## TCI software package
 
-- No easy to use software currently exists
+- No user-friendly open-source software currently exists
 
 --
 
@@ -503,8 +487,6 @@ class: center, middle
 
 - Original squashing method
 
---
-
 - Extensions to data sets with missing values
   1. Propagation squashing
   2. Expectation squashing
@@ -513,8 +495,6 @@ class: center, middle
 ## Introduction - Data squashing
 
 - Proposed by DuMouchel et al. (1999)
-
---
 
 - Goal is to replace a large data set with a much smaller, "squashed" data set
 
@@ -526,17 +506,9 @@ knitr::include_graphics("./images/squash_data_example.png")
 ```
 ]
 
---
-
 - $d_i$ is a vector of covariates for the ith row
 
---
-
-- $d^*_i$ is "pseudo-data" with the same covariates, but made up values
-
---
-
-- $d^*$ is constructed so that models fit to $d^*$ will give (approximately) the same results as when fit to $d$
+- $d^*$ is "pseudo-data" constructed so that models fit to $d^*$ will give similar results as when fit to $d$
 
 
 ---
@@ -548,6 +520,7 @@ knitr::include_graphics("./images/squash_iris.png")
 ```
 ]
 
+- Original: N=150; Squashed: M=18
 - Reduction factor: 8.3
 - Squashed points are constructed, not sampled
 
@@ -573,14 +546,12 @@ $$\sum_{i=1}^N \log(f(d_i|\theta)) = \sum_{j=1}^M w_j^*\log(f(d_j^*|\theta))$$
 
 --
 
-- Within categorical regions, take Taylor series approximation as a function of the data at $d=\mu$
+- Within categorical regions, take Taylor series approximation as a function of the data at the means of each variable, $(\mu_1,...\mu_Q)$
 
 $$\sum_{i=1}^{N_r}\log(f(X_{i1},...,X_{iQ}|A=a, \theta)) \approx \sum_{i=1}^{N_r}\sum_{k=1}^K g_k \prod_{j=1}^Q (X_{ij} - \mu_j)^{p_{kj}}$$
 --
 
 - $K$ terms in Taylor approximation, $N_r$ observations in region $r$
-
---
 
 - Precision of approximation increases with higher $K$, determined by degree of approximation, $d$
 
