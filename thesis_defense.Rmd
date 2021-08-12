@@ -17,14 +17,19 @@ output:
 library(knitr)
 library(xaringanExtra)
 opts_chunk$set(echo = FALSE, eval=TRUE)
-use_freezeframe(trigger = "click", overlay = TRUE)
+use_freezeframe()
 ```
+
 ---
-# Overview
+# Slides
 
 Slides available at: https://jarretrt.github.io/defense/thesis_defense
 
 Files available at: https://github.com/jarretrt/defense
+
+
+---
+# Overview
 
 - **Chapters 1 & 2**: 
 
@@ -77,7 +82,7 @@ Many things - anesthesia is complicated
 
 --
 
-- Consequences of over- and under-dosing with anesthetic propofol (e.g., cardiovascular effects, delirium, interoperative awareness)
+- IV anesthetic propofol: cardiovascular effects, delirium, interoperative awareness
 
 --
 
@@ -159,9 +164,7 @@ So what are we seeing here...?
 
 --
 
-- Target-controlled infusion (TCI) device calculates the infusion rate required to reach target
-
---
+- Target-controlled infusion (TCI) device calculates and delivers the infusion rate required to reach target
 
 .center[
 ```{r, tci-image, out.width = 300, out.height = 240, fig.pos="center", fig.cap="https://commons.wikimedia.org/wiki/File:Syringe_pump,_Lambda_VIT-FIT.jpg"}
@@ -198,11 +201,11 @@ knitr::include_graphics("images/Syringe_pump.jpeg")
 ---
 ## Closed-loop takeaways
 
-- Large doses are administered at the start
+- Large doses are administered at the start when the least is known about the patient
 
 --
 
-- Overshoot occurs and can't be prevented
+- Asymmetrical process: medication can be administered but not removed
 
 --
 
@@ -439,9 +442,35 @@ knitr::include_graphics("./images/dose-difference.jpeg")
 
 1. Implements TCI algorithms to identify infusion rates
 
-2. Simulates patient responses
+.center[
+```{r, tci-inf-rate-example, out.width = 500, out.height = 500, fig.cap="Predicted patient responses to infusion schedule defined by ’tci’ function."}
+knitr::include_graphics("./images/tci-illustration-plot-1.jpeg")
+```
+]
 
-3. Allows for feedback through closed-loop control
+---
+## TCI software package
+
+2. Simulates patient responses with/without feedback
+
+.center[
+```{r, tci-bayes-sim, out.width = 500, out.height = 500, fig.cap="Simulated response of example patient under Bayesian closed-loop control."}
+knitr::include_graphics("./images/bayes-sim-1.jpeg")
+```
+]
+
+
+---
+## TCI software package
+
+3. Custom PK models and TCI algorithms
+
+.center[
+```{r, custom-tci-alg, out.width = 500, out.height = 500, fig.cap="User-defined concentration-limiting TCI effect-site algorithm."}
+knitr::include_graphics("./images/tci-custom-alg-1.jpeg")
+```
+]
+
 
 ---
 ## TCI software package
@@ -454,12 +483,7 @@ knitr::include_graphics("./images/dose-difference.jpeg")
 
 --
 
-- `tci` is freely available, in R, and is highly customizable: user-specified models, TCI algorithms
-
---
-
-- Future versions will use `Rcpp` and offer broader support for closed-loop control
-
+- `tci` is freely available, in a widely-used language (i.e., R), and is highly customizable
 
 ---
 class: center, middle
@@ -526,11 +550,15 @@ $$\sum_{i=1}^N \log(f(d_i|\theta)) = \sum_{j=1}^M w_j^*\log(f(d_j^*|\theta))$$
 ---
 ## How does data squashing work?
 
-- Split data, $d$, into quantitative variables, $X_1,...,X_Q$, and categorical variables, $A_1,...,A_C$
+- Data set quantitative variables, $X_1,...,X_Q$, and categorical variables, $A_1,...,A_C$
 
 --
 
-- Within categorical regions, take Taylor series approximation as a function of the data at the means of each variable, $(\mu_1,...\mu_Q)$
+- Group the data into categorical combinations and cluster numeric variables within each combination
+
+--
+
+- Within each grouping, take Taylor series approximation as a function of the data at the means of each variable, $(\mu_1,...\mu_Q)$
 
 $$\sum_{i=1}^{N_r}\log(f(X_{i1},...,X_{iQ}|A=a, \theta)) \approx \sum_{i=1}^{N_r}\sum_{k=1}^K g_k \prod_{j=1}^Q (X_{ij} - \mu_j)^{p_{kj}}$$
 --
@@ -570,7 +598,7 @@ $$\sum_{i=1}^{N_r}\log(f(X_{i1},...,X_{iQ}|A=a, \theta)) \approx \sum_{i=1}^{N_r
 
 --
 
-- **Procedure:** Group data into local regions and construct squashed sample to have the same moments as the original data within each region
+- **Procedure:** Group data into local regions and construct squashed sample to match moments
 
 --
 
@@ -647,13 +675,13 @@ $$L^{FIML} = \prod_{i=1}^Mf_i(x_{i,obs},x_{i,mis}|\theta) \prod_{i=M+1}^N f^*_i(
 
 --
 
-Log likelihood
+Observed data log likelihood
 
 $$\log(L^{FIML}) = \sum_{i=1}^M \log f_i(x_{i,obs},x_{i,mis}|\theta) + \sum_{i=M+1}^N \log f^*_i(x_{i,obs}|\theta)$$
 
 --
 
-- Define regions to have constant missingness patterns and evaluate Taylor series on the observed data likelihood
+- Evaluate Taylor approximation with respect to the variables in each group
 
 --
 
@@ -669,10 +697,9 @@ Simple modifications:
 
 --
 
-In each region, numeric variables will be either fully observed or fully missing 
+After grouping, numeric variables will be either fully observed or fully missing in each region
 
-3. Create squashed data set with the same missingness patterns as the original data set
-
+Create squashed data set with the same missingness patterns as the original data set
 
 ---
 ## P-squashing performance - Simulations
@@ -727,7 +754,7 @@ knitr::include_graphics("./images/sim_res_miss-3.jpeg")
 
 --
 
-- Squashes the expectation of the log-likelihood, with respect to the missing data
+- Reproduce the expectation of the log-likelihood, with respect to the missing data
 
 --
 
@@ -742,11 +769,32 @@ $$E_{X_M,A_M}[\text{log}L(\theta|X,A)] = \sum_{i=1}^N E_{X_M,A_M}[\log(f(X_{iO},
 
 --
 
-- Moment-matching occurs in local regions (i.e., within constant categories, numeric clusters) for accuracy of Taylor approximation
+- Moment-matching occurs in local regions (i.e., within constant categories, numeric clusters)
 
 --
 
 - With missing values, $X_M, A_M$, it is unclear which regions observations should be assigned to
+
+
+---
+## Cluster uncertainty
+
+.center[
+```{r, cluster-plot1, out.width = 574, out.height = 421}
+knitr::include_graphics("./images/cluster_plot1.jpeg")
+```
+]
+
+
+---
+## Cluster uncertainty
+
+.center[
+```{r, cluster-plot2, out.width = 574, out.height = 421}
+knitr::include_graphics("./images/cluster_plot2.jpeg")
+```
+]
+
 
 ---
 ## E-squashing
@@ -840,9 +888,16 @@ knitr::include_graphics("./images/group1_example.jpeg")
 ```
 ]
 
+--
+
 Example:
 
 $$\sum w_i X_{i1}^3 = (1)2.2^3 + (1)3^3 + (0.8)2.5^3 = 50.148$$
+
+Scale to reflect full sample size
+
+$$50.148~\times (2.9/2.8) = 51.939$$
+
 
 ---
 ## E-squashing simulation performance
@@ -867,7 +922,7 @@ knitr::include_graphics("./images/sim_res_missE.jpeg")
 
 --
 
-- Claims by workers for lost wages due to illness or injury during the course of employment
+- Claims for lost wages due to illness or injury during the course of employment
 
 ---
 ## Analysis
@@ -889,7 +944,7 @@ knitr::include_graphics("./images/sim_res_missE.jpeg")
 
   1) Indicator that claim is Covid-related, 
 
-  2) indicator that claim was assembled after March 1, 2020
+  2) Indicator that claim was assembled after March 1, 2020
 
 
 
@@ -916,7 +971,7 @@ Research question:
 
 
 ---
-## Ordinal analysis - Severity of workers' comp. claim
+## Ordinal analysis - Severity of workers' comp. claims
 
 - Outcome is ordinal claim severity
 
@@ -930,13 +985,13 @@ Research question:
 
 --
 
-- MI used to handle missing values (10 imputations each)
+- MI used to handle missing values (10 imputations each via predictive mean matching)
 
 ---
 ## Ordinal analysis - Severity of workers' comp. claim
 
 .center[
-```{r, squash-analysis-2-fp, out.width = 745, out.height = 595}
+```{r, squash-analysis-2-fp, out.width = 633, out.height = 506}
 knitr::include_graphics("./images/ord_o2_fp.jpeg")
 ```
 ]
@@ -962,13 +1017,13 @@ knitr::include_graphics("./images/ord_o2_stats.jpeg")
 
 <small>
 
-- Full data: -0.482 [-0.491, -0.474]
+- Full data: -0.532 [-0.557, -0.507] 
 
-- P-squash: -0.483 [-0.491, -0.475] 
+- P-squash: -0.562 [-0.586, -0.538] 
 
-- E-squash: -0.466 [-0.475, -0.458] 
+- E-squash: -0.534 [-0.558, -0.509] 
 
-- Sample: -0.506 [-0.572, -0.440]
+- Sample: -0.415 [-0.609, -0.221]
 
 </small>
 --
@@ -978,13 +1033,13 @@ knitr::include_graphics("./images/ord_o2_stats.jpeg")
 
 <small>
 
-- Full data: 0.224 [0.196,0.254] 
+- Full data: -0.307 [-0.390, -0.223] 
 
-- P-squash: 0.223 [0.193,0.252] 
+- P-squash: -0.280 [-0.364, -0.197] 
 
-- E-squash: 0.211 [0.182, 0.241] 
+- E-squash: -0.272 [-0.356, -0.188] 
 
-- Sample: 0.264 [0.049, 0.480]
+- Sample: -0.462 [-1.081, 0.157]
 
 </small>
 

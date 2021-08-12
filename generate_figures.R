@@ -612,6 +612,26 @@ anim_save(filename = "Presentation/images/rf_sim.gif")
 
 
 
-
+### display region uncertainty
+library(mvtnorm)
+library(ggplot2)
+theme_set(theme_bw())
+N = 50
+group <- rep(c("Group 1","Group 2"), each = N/2)
+mu1 = c(1,3)
+mu2 = c(1.5,-3)
+X <- rbind(rmvnorm(N/2, mu1), rmvnorm(N/2, mu2))
+df <- as.data.frame(X)
+df$group <- group
+names(df) <- c("X1","X2","group")
+ggplot(df, aes(x = X1, y = X2, color = group)) + geom_point() +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0) + 
+  scale_color_hue(l=50, c=80) +
+  theme(legend.position = "top") + 
+  geom_vline(xintercept = 0.9, linetype = "dotted", size = 1) +
+  annotate("text", x = 1.2, y = 0.4, label = "(0.9,NA)") +
+  geom_rug(outside = TRUE)
+  
 
 
