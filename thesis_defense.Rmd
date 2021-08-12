@@ -953,13 +953,14 @@ knitr::include_graphics("./images/ord_o2_stats.jpeg")
 
 ---
 ## Ordinal analysis - Severity of workers' comp. claim
-class: small
 
 **Conclusion:** Both claims marked as Covid-19 related and claims assembled March 1, 2020 tended to be associated with **less severe** outcomes
 
 --
 
 **Effect post March 1, 2020**
+
+<small>
 
 - Full data: -0.482 [-0.491, -0.474]
 
@@ -969,9 +970,13 @@ class: small
 
 - Sample: -0.506 [-0.572, -0.440]
 
+</small>
 --
 
+
 **Effect of Covid-19 related indicator**
+
+<small>
 
 - Full data: 0.224 [0.196,0.254] 
 
@@ -981,6 +986,7 @@ class: small
 
 - Sample: 0.264 [0.049, 0.480]
 
+</small>
 
 
 ---
