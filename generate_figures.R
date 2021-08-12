@@ -322,18 +322,6 @@ pclc <- ggplot(dat_clcm, aes(x = time, y = value)) +
   geom_vline(xintercept = 10, linetype = "dashed") +
   geom_hline(aes(yintercept = target))
 
-# pclc <- ggplot(dat_clc, aes(x = time, y = pd0)) + 
-#   geom_line(size = 1.5) +
-#   geom_point(aes(x= time, y = pdobs, group = seq_along(pdobs)), 
-#              color = "blue", alpha = 0.4) +
-#   labs(x = "Minutes", y = "Bispectral Index (BIS)", 
-#        title = "Targeting BIS=50, update at 10 min") +
-#   theme(legend.position="bottom") +
-#   geom_vline(xintercept = 10, linetype = "dashed") +
-#   geom_hline(yintercept = target)
-# 
-# ggsave(filename = "Presentation/images/clc_pic.pdf", pclc)
-
 pclc + transition_reveal(time)
 anim_save(filename = "images/clc_sim.gif")
 

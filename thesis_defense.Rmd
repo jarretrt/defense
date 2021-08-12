@@ -22,12 +22,14 @@ use_freezeframe(trigger = "click", overlay = TRUE)
 ---
 # Overview
 
+Slides available at: https://jarretrt.github.io/defense/thesis_defense
+
+Files available at: https://github.com/jarretrt/defense
+
 - **Chapters 1 & 2**: 
 
   1. Optimal BIS reference functions for closed-loop induction of anesthesia with propofol
   2. Illustrated with R Software package, `tci` (target-controlled infusions)
-  
---
 
 - **Chapter 3**: Data squashing with missing values
 
@@ -265,7 +267,7 @@ knitr::include_graphics("images/Syringe_pump.jpeg")
 --
 
 .center[
-```{r, objective-functions, out.width = 375, out.height = 300}
+```{r, objective-functions, out.width = 280, out.height = 280}
 knitr::include_graphics("./images/objective_functions.jpeg")
 ```
 ]
@@ -283,7 +285,7 @@ knitr::include_graphics("./images/objective_functions.jpeg")
 
 --
 
-- For a population of patients, there a distribution of individual-level criterion values
+- For a population of patients, there a distribution of individual-level criterion values, representing PK-PD variability in the population
 
 --
 
@@ -293,7 +295,9 @@ knitr::include_graphics("./images/objective_functions.jpeg")
 
 - We optimize the reference function parameters to minimize some characteristic of this distribution:
 
-- 1) Average stable entry time, 2) variance of stable entry time, 3) average dose
+  1. Average stable entry time
+  2. Variance of stable entry time 
+  3. Average dose of propofol
 
 
 ---
@@ -317,20 +321,9 @@ knitr::include_graphics("./images/objective_functions.jpeg")
 
 - Data are split into training set of $N_{\text{train}}=50$ patients used to identify optimal RF, and $N_{\text{test}}=72$ patients to evaluate performance
 
-
-
----
-## Reference function optimization
+--
 
 - Evaluate grid of reference function parameters
-
---
-
-- Run simulation 3x to account for Monte Carlo error
-
---
-
-- Calculate average criterion performance over iterations
 
 ---
 ## Optimized reference functions
@@ -428,11 +421,7 @@ knitr::include_graphics("./images/dose-difference.jpeg")
 
 --
 
-3. Reference functions can be used by any closed-loop controller
-
---
-
-4. Can be optimized and put in place prior to first dose
+3. Reference functions can be used by any closed-loop controller and can be put in place before induction
 
 
 ---
@@ -442,12 +431,7 @@ knitr::include_graphics("./images/dose-difference.jpeg")
 
 1. Suboptimal if population is not adequately described by population PK-PD model
 
---
-
-2. Performance may vary for different controllers
-
-
-3. Optimization process is computationally intensive
+2. Optimization process is computationally intensive
 
 
 ---
@@ -553,26 +537,12 @@ $$\sum_{i=1}^{N_r}\log(f(X_{i1},...,X_{iQ}|A=a, \theta)) \approx \sum_{i=1}^{N_r
 
 - $K$ terms in Taylor approximation, $N_r$ observations in region $r$
 
-- Precision of approximation increases with higher $K$, determined by degree of approximation, $d$
-
---
-
-- $p$ denotes all vectors such that $\sum_{j}p_{kj} \le d$
-
+- Precision of approximation increases with higher $K$
 
 ---
 ## Example expansion
 
-- Let $Q = d = 2$
-
---
-
-- Possible power vectors such that $\sum_{j}p_{kj} \le 2$
-
-$$\mathbf{p} = \{(0,0),(1,0),(0,1),(2,0),(0,2),(1,1)\}$$
---
-
-- Results in expansion with $K=|\mathbf{p}| = 6$ terms
+- For two variables with a highest-order power of two, the expansion has six terms
 
 \begin{equation}
   \begin{aligned}
@@ -587,8 +557,7 @@ $$\mathbf{p} = \{(0,0),(1,0),(0,1),(2,0),(0,2),(1,1)\}$$
 
 --
 
-- Results in scaled sample moments when summed
-
+- Each term is a scaled sample moment when summed over $i = 1,...,N_r$
 
 ---
 ## How does data squashing work?
@@ -601,55 +570,13 @@ $$\mathbf{p} = \{(0,0),(1,0),(0,1),(2,0),(0,2),(1,1)\}$$
 
 --
 
-- **Procedure:** Group data into local regions and construct squashed sample to have the same moments as the original data
+- **Procedure:** Group data into local regions and construct squashed sample to have the same moments as the original data within each region
 
+--
 
-<!-- --- -->
-<!-- ## How does data squashing work? -->
+- Squashed sample set by tuning parameter, $\alpha$ 
 
-<!-- -- -->
-
-<!-- - Plug in Taylor expansion and switch order of summation ($Nr$ and $K$) -->
-
-<!-- \begin{equation} -->
-<!-- \sum_{k=1}^K g_k \sum_{i=1}^{N_r}\prod_{j=1}^Q(X_{ij}-\mu_j)^{p_{kj}} = \sum_{k=1}^K g_k \sum_{i=1}^{M_r}w_i\prod_{j=1}^Q(Y_{ij}-\mu_j)^{p_{kj}}  -->
-<!-- \end{equation} -->
-
-<!-- -- -->
-
-<!-- - Equality will hold if it holds for each moment -->
-
-<!-- \begin{equation} -->
-<!-- \sum_{i=1}^{N_r}\prod_{j=1}^Q(X_{ij}-\mu_j)^{p_{kj}} = \sum_{i=1}^{M_r}w_i\prod_{j=1}^Q(Y_{ij}-\mu_j)^{p_{kj}} -->
-<!-- \end{equation} -->
-
-<!-- -- -->
-
-<!-- - **If moments are matched between original and squashed data sets, the likelihood functions will be (approximately) equal!** -->
-
-<!-- -- -->
-
-<!-- - True for *any* likelihood -->
-
-<!-- --- -->
-<!-- ## Squashing Procedure -->
-
-<!-- -- -->
-
-<!-- 1. Group numeric variables within categories -->
-
-<!-- -- -->
-
-<!-- 2. Select set of moments to match: up to 4th order -->
-
-<!-- -- -->
-
-<!-- 3. Select size of squashed sample: $M_r = \max(1,\alpha \log(N_r))$ -->
-
-<!-- -- -->
-
-<!-- 4. Minimize squared distance between sample moments and squashed weighted moments -->
-
+$$M_r = \max(1,\alpha \log(N_r))$$
 
 ---
 ## Why does no one use data squashing?
@@ -691,10 +618,6 @@ Impressive performance in examples, but...
 
 - Calculates a separate likelihood for each missingness pattern by marginalizing over distribution of missing values
 
---
-
-- Handles missing data and fits model in single step (in contrast to multiple imputation)
-
 
 ---
 ## P-squashing - FIML
@@ -730,44 +653,25 @@ $$\log(L^{FIML}) = \sum_{i=1}^M \log f_i(x_{i,obs},x_{i,mis}|\theta) + \sum_{i=M
 
 --
 
-- Define regions to have constant missingness patterns and evaluate Taylor series on fully observed 
+- Define regions to have constant missingness patterns and evaluate Taylor series on the observed data likelihood
 
 --
 
 $$\log(L^{FIML}) \approx \sum_{i=1}^M \sum_{k=1}^{K_1}g_{k1}(x_{i,obs} - \mu_{obs,1})^{p_{k1}}(x_{i,mis} - \mu_{mis})^{p_{k2}} \\ + \sum_{i=M+1}^N \sum_{k=1}^{K_2}g_{k2}(x_{i,obs} - \mu_{obs,2})^{p_{k1}}$$
 
---
-
-- Subscripts 1 and 2 for $K, \mu, p$ denote values changing between fully-observed and partially-observed regions of the data  
-
---
-
-- A different set of moments are calculated for each term
-
 ---
 ## Implementation of P-squashing
 
-- Simple modification of original squashing method
+Simple modifications:
+
+1. Define a categorical variable indicating missingness pattern 
+2. Treat NAs in categorical variables as a separate category
 
 --
 
-- Define a categorical variable indicating missingness pattern
+In each region, numeric variables will be either fully observed or fully missing 
 
---
-
-- Treat NAs in categorical variables as a separate category
-
---
-
-- Regions are split, by default, based on categorical levels
-
---
-
-- This ensures that each numeric variable will be either fully observed, or fully missing in each region
-
---
-
-- Squashed data set is constructed to have NAs in same locations as original data set
+3. Create squashed data set with the same missingness patterns as the original data set
 
 
 ---
@@ -781,10 +685,15 @@ $$\log(L^{FIML}) \approx \sum_{i=1}^M \sum_{k=1}^{K_1}g_{k1}(x_{i,obs} - \mu_{ob
 
 --
 
-- Outcome $Y$ generated 
+- Outcome $Y$ generated: $Y = (X_1+X_1^2)*A + X_2 + \epsilon$
 
-$$\begin{aligned} Y &= 5+ 2X_1 - X_1^2 + 3A_2 + 5A_3 +3X_2 +5X_1 A_2 - X_1 A_3 - 2X_1^2 A_2 + X_1^2 A_3+ \epsilon \\ \epsilon &\sim N(0,4) \end{aligned}$$
+--
 
+- 20% or 50% of rows have missing values (MAR)
+
+--
+
+- Tuning parameter: $\alpha = 1,1.5,2,\infty$
 
 ---
 ## P-squashing performance - Simulations
@@ -795,14 +704,37 @@ knitr::include_graphics("./images/sim_res_miss.jpeg")
 ```
 ]
 
+---
+## P-squashing performance - Simulations
 
+.center[
+```{r, p-squash-sim-2, out.width = 500, out.height = 500}
+knitr::include_graphics("./images/sim_res_miss-2.jpeg")
+```
+]
+
+---
+## P-squashing performance - Simulations
+
+.center[
+```{r, p-squash-sim-3, out.width = 500, out.height = 500}
+knitr::include_graphics("./images/sim_res_miss-3.jpeg")
+```
+]
 
 ---
 ## Expectation squashing (E-squashing)
 
+--
+
 - Squashes the expectation of the log-likelihood, with respect to the missing data
 
 --
+
+- Creates a fully observed data set that preserves likelihood information
+
+---
+## E-squashing
 
 Log-likelihood with observed ("O") and missing ("M") variables
 
@@ -810,11 +742,11 @@ $$E_{X_M,A_M}[\text{log}L(\theta|X,A)] = \sum_{i=1}^N E_{X_M,A_M}[\log(f(X_{iO},
 
 --
 
-- Squashing occurs in local regions (i.e., within constant categories, numeric clusters) for accuracy of Taylor approximation
+- Moment-matching occurs in local regions (i.e., within constant categories, numeric clusters) for accuracy of Taylor approximation
 
 --
 
-- With missing values, $X_M, A_M$, it is unclear which regions they should be assigned to
+- With missing values, $X_M, A_M$, it is unclear which regions observations should be assigned to
 
 ---
 ## E-squashing
@@ -823,15 +755,20 @@ $$E_{X_M,A_M}[\text{log}L(\theta|X,A)] = \sum_{i=1}^N E_{X_M,A_M}[\log(f(X_{iO},
 
 $$\phi(X_i,A_i) = r \in 1,...,R$$
 $$Z_{ir} = \begin{cases} 1 & \text{if} ~\phi(X_i , A_i) = r \\ 0 & \text{otherwise}\end{cases}$$
+--
 
 - Define complete-data log likelihood
 
 $$\text{log} L(\theta|X,A) = \sum_{r=1}^R \sum_{i=1}^{N_r} Z_{ir} \log(f(X_{iO},X_{iM}|A=a))$$
 
-- Expectation of complete-data log likelihood
+---
+## E-squashing
+
+Expectation of complete-data log likelihood
 
 $$\begin{aligned}E_{X_M,A_M}[\text{log} L(\theta |X,A)] &= \sum_{r=1}^R \sum_{i=1}^{N_r} E_{X_M,A_M}[Z_{ir}] E_{X_M|A_M}[\log(f(X_{iO},X_{iM}|A=a))] \\ &... \\ &\approx \sum_{r=1}^R \sum_{i=1}^{N_r}p(A_{iM}= a_{iM}|x_{iO},a_{iO})p(\phi = r|x_{iO},a_{iO},a_{iM}) \\
   & ~~~~~~~~~\cdot \sum_{k=1}^K g_k \cdot E_{X_M}\left[\prod_{j=1}^{u(\xi)}(X_{ij}-x_j)^{p_{kj}}\right] \end{aligned}$$
+
 
 --
 
@@ -852,7 +789,7 @@ $$\begin{aligned}E_{X_M,A_M}[\text{log} L(\theta |X,A)] &= \sum_{r=1}^R \sum_{i=
 - Missing values are expanded to include all possible values and weighted according to probability of belonging in each group
 
 .center[
-```{r, cat-expansion, out.width = 600, out.height = 200}
+```{r, cat-expansion, out.width = 650, out.height = 200}
 knitr::include_graphics("./images/cat_expansion.jpeg")
 ```
 ]
@@ -895,7 +832,7 @@ knitr::include_graphics("./images/numeric_expansion2.jpeg")
 ---
 ## E-squashing procedure - 3. Calculate expected moments
 
-- Calculate weighted moments
+- Calculate weighted moments based on all available information
 
 .center[
 ```{r, moment-calculation, out.width = 266, out.height = 81}
@@ -903,11 +840,9 @@ knitr::include_graphics("./images/group1_example.jpeg")
 ```
 ]
 
---
+Example:
 
-- All available information is used for each moment
-
-
+$$\sum w_i X_{i1}^3 = (1)2.2^3 + (1)3^3 + (0.8)2.5^3 = 50.148$$
 
 ---
 ## E-squashing simulation performance
@@ -919,25 +854,20 @@ knitr::include_graphics("./images/sim_res_missE.jpeg")
 ]
 
 
-
-
 ---
 ## New York workers' compensation data set
 
-- Workers' compensation claims filed in New York, January 1, 2000 to June 8, 2021 (available at https://data.ny.gov/Government-Finance/Assembled-Workers-Compensation-Claims-Beginning-20/jshw-gkgu)
+- Workers' compensation claims filed in New York, January 1, 2000 to June 8, 2021 
+  - Available at https://data.ny.gov/Government-Finance/Assembled-Workers-Compensation-Claims-Beginning-20/jshw-gkgu
 
 --
-- 2.2 million records on 11 variables*, maximum of 53\% missing on workers' industry
+- 2.2 million records on 11 variables*, maximum of 53% missing on workers' industry
 
 .footnote[*After pre-processing steps]
 
 --
 
 - Claims by workers for lost wages due to illness or injury during the course of employment
-
---
-
-- Large enough to be extremely cumbersome to work with
 
 ---
 ## Analysis
@@ -951,93 +881,48 @@ knitr::include_graphics("./images/sim_res_missE.jpeg")
 .footnote[*KMPG,2020]
 --
 
-- Covid-19 may have exacerbated this: backlogs due to closure of courts, reluctance or inability to seek medical care
+- Covid-19 may have exacerbated this: reluctance or inability to seek medical care
 
 --
 
-- 1) Indicator that claim is Covid-related, 2) indicator that claim was assembled after March 1, 2020
+- Data set contains:
+
+  1) Indicator that claim is Covid-related, 
+
+  2) indicator that claim was assembled after March 1, 2020
 
 
-Research questions: 
 
-1. Has Covid-19 resulted in delays between claim assembly and claim verification?
+---
+## Analysis
 
---
+Research question: 
 
-2. Has Covid-19 increased the severity of claims (medical only vs. temporary disability vs. permanent disability/death)?
+**Has Covid-19 increased the severity of workers' compensation claims?**
+
+- 3 levels: medical only vs. temporary disability vs. permanent disability/death
 
 
 ---
 ## Data sets
 
 1. Full data, N=2,191,006
-2. P-squashed data set, N=32,027 ($\alpha=1.5$, reduction factor = 68.4)
-3. E-squashed data set, N=27,660 ($\alpha=2$, reduction factor = 79.2)
+
+2. P-squashed data set, N=32,027 (alpha=1.5, reduction factor = 68.4)
+
+3. E-squashed data set, N=27,660 (alpha=2, reduction factor = 79.2)
+
 4. Simple random sample, N=32,000
 
 
-
 ---
-## Analysis 1 - Time between assembly and verification date
+## Ordinal analysis - Severity of workers' comp. claim
 
-- Outcome is logged difference in time, fit with multiple linear regression
+- Outcome is ordinal claim severity
 
 --
 
-- All second-order terms and interactions used as predictors
-
---
-
-- FIML used to handle missing values
-
-
-
----
-## Analysis 1 - Time between assembly and verification date
-
-.center[
-```{r, squash-analysis-1-fp, out.width = 565, out.height = 479}
-knitr::include_graphics("./images/fiml_o2_fp.jpeg")
-```
-]
-
-
----
-## Analysis 1 - Time between assembly and verification date
-
-.center[
-```{r, squash-analysis-1-stats, out.width = 565, out.height = 300}
-knitr::include_graphics("./images/fiml_o2_stats.jpeg")
-```
-]
-
----
-## Analysis 1 - Time between assembly and verification date
-
-**Conclusion:** Claims after March 1, 2020 were processed more quickly **BUT**-- this was less pronounced when claims were marked as Covid-19 related.
-
-
-<!-- **Effect post March 1, 2020** -->
-
-<!-- full data: -0.482 [-0.491, -0.474]  -->
-<!-- p-squash: -0.483 [-0.491, -0.475]  -->
-<!-- e-squash: -0.466 [-0.475, -0.458]  -->
-<!-- sample: -0.506 [-0.572, -0.440] -->
-
-<!-- -- -->
-
-<!-- **Effect of Covid-19 related indicator** -->
-
-<!-- full data: 0.224 [0.196,0.254]  -->
-<!-- p-squash: 0.223 [0.193,0.252]  -->
-<!-- e-squash: 0.211 [0.182, 0.241]  -->
-<!-- sample: 0.264 [0.049, 0.480] -->
-
-
----
-## Analysis 2 - Severity of workers' comp. claim
-
-- Outcome is ordinal claim severity (medical only vs. temporary disability vs. permanent disability/death)
+- Proportional-odds (i.e. cumulative logit) regression model on claim severity
 
 --
 
@@ -1048,26 +933,27 @@ knitr::include_graphics("./images/fiml_o2_stats.jpeg")
 - MI used to handle missing values (10 imputations each)
 
 ---
-## Analysis 2 - Severity of workers' comp. claim
+## Ordinal analysis - Severity of workers' comp. claim
 
 .center[
-```{r, squash-analysis-2-fp, out.width = 565, out.height = 479}
+```{r, squash-analysis-2-fp, out.width = 745, out.height = 595}
 knitr::include_graphics("./images/ord_o2_fp.jpeg")
 ```
 ]
 
 
 ---
-## Analysis 2 - Severity of workers' comp. claim
+## Ordinal analysis - Severity of workers' comp. claim
 
 .center[
-```{r, squash-analysis-2-stats, out.width = 565, out.height = 300}
+```{r, squash-analysis-2-stats, out.width = 678, out.height = 360}
 knitr::include_graphics("./images/ord_o2_stats.jpeg")
 ```
 ]
 
 ---
-## Analysis 2 - Severity of workers' comp. claim
+## Ordinal analysis - Severity of workers' comp. claim
+class: small
 
 **Conclusion:** Both claims marked as Covid-19 related and claims assembled March 1, 2020 tended to be associated with **less severe** outcomes
 
@@ -1075,19 +961,25 @@ knitr::include_graphics("./images/ord_o2_stats.jpeg")
 
 **Effect post March 1, 2020**
 
-full data: -0.482 [-0.491, -0.474] 
-p-squash: -0.483 [-0.491, -0.475] 
-e-squash: -0.466 [-0.475, -0.458] 
-sample: -0.506 [-0.572, -0.440]
+- Full data: -0.482 [-0.491, -0.474]
+
+- P-squash: -0.483 [-0.491, -0.475] 
+
+- E-squash: -0.466 [-0.475, -0.458] 
+
+- Sample: -0.506 [-0.572, -0.440]
 
 --
 
 **Effect of Covid-19 related indicator**
 
-full data: 0.224 [0.196,0.254] 
-p-squash: 0.223 [0.193,0.252] 
-e-squash: 0.211 [0.182, 0.241] 
-sample: 0.264 [0.049, 0.480]
+- Full data: 0.224 [0.196,0.254] 
+
+- P-squash: 0.223 [0.193,0.252] 
+
+- E-squash: 0.211 [0.182, 0.241] 
+
+- Sample: 0.264 [0.049, 0.480]
 
 
 
@@ -1113,99 +1005,82 @@ Eleveld, D. J., Colin, P., Absalom, A. R., and Struys, M. M. R. F. (2018).  Phar
 
 KPMG (2020), The Impact of COVID-19 on Workers’ Compensation, 1–34.
 
-Loeb, R. G. and Cannesson, M. (2017), Closed-loop anesthesia: Ready for prime time?, Anesthesia and Analgesia 124(2), 381–382.
-
 
 ---
 # Acknowledgements
 
+- **Advisor:** Dr. Matt Shotwell
 
+- **Committee:** Drs. Bryan Shepherd, Jonathan Schildcrout, Leena Choi, and André Diedrich
 
+- **Research Assistantship:** 
+  - Dr. Rameela Raman 
+  - Vanderbilt Center of Excellence for Children in State Custody
+
+- VU biostatistics students, staff, and faculty
+
+- Friends and family
+
+---
+# Questions?
 
 
 
 ---
-## E-squashing theory
+## Extra slide
 
-- First term: expectation of that observation $i$ is assigned to region $r$
+<!-- --- -->
+<!-- ## Analysis 1 - Time between assembly and verification date -->
 
---
+<!-- - Outcome is logged difference in time, fit with multiple linear regression -->
 
-- Make **assumption** that regions are defined *without reference to the missing values*
+<!-- -- -->
 
---
+<!-- - All second-order terms and interactions used as predictors -->
 
-Expectation of region indicator
+<!-- -- -->
 
-$$\begin{aligned} E_{X_M,A_M}[Z_{ir}] &= p(\phi(X_i,A_i) = r) \\ &= p(\phi(X_{iM},A_{iM},x_{iO},a_{iO}) = r|x_{iO},a_{iO}) \\ &= p(A_{iM}= a_{iM}|x_{iO},a_{iO})p(\phi(X_{iM},a_{iM},x_{iO},a_{iO}) = r|x_{iO},a_{iO},a_{iM}) \\ \end{aligned}$$
-
-
-
-
-<!-- 
-Learn more about:
-
-1. FIML
-  - FIML uses information from all available observations
-  - Maximizes likelihood containing fully observed values in each pattern
-  - Ordinarily would just take the derivative of the log-likelihood wrt parameters, but in general don't have a closed-form -> iterative solution
-2. EM algorithm applied to FIML
-  - Calculate expectation of missing values w.r.t observed value
-
-
-3. Taylor expansion of log-likelihood about the data (vs about the parameters)
-4. Asymptotic normality of MLE
-
-
--->
+<!-- - FIML used to handle missing values -->
 
 
 
-<!-- - Currently, an anesthesiologist will manually deliver bolus doses and infusions to achieve a desired response. -->
-<!--   - Many drugs simultaneously -->
-<!--   - Dynamics of and interactions between drugs are difficult to predict -->
-<!--   - Narrow therapeutic ranges -->
-<!-- - Automation through "closed-loop" systems -->
-<!--   - Patient feedback (e.g. EEG signal) is fed back into system -->
-<!--   - Reduced workload, less human error, more precise control -->
+<!-- --- -->
+<!-- ## Analysis 1 - Time between assembly and verification date -->
 
-<!-- ## Background - Automation of anesthesia -->
-
-<!--   - Induction of anesthesia is difficult to automate -->
-<!--   - Goal is to rapidly bring a patient to the target level of anesthesia -->
-<!--   - Precise dose is unknown due to interpatient variability -->
-<!--   - Target under- and over-shoot have consequences -->
-<!--   - **How can we optimally induct patients under closed-loop control in the presence of interpatient variability?** -->
+<!-- .center[ -->
+<!-- ```{r, squash-analysis-1-fp, out.width = 565, out.height = 479} -->
+<!-- knitr::include_graphics("./images/fiml_o2_fp.jpeg") -->
+<!-- ``` -->
+<!-- ] -->
 
 
-<!-- ## Optimal design of experiments -->
+<!-- --- -->
+<!-- ## Analysis 1 - Time between assembly and verification date -->
 
-<!-- - ODE approach: "what levers exist in the system that we can pull to elicit a desired outcome?" -->
-<!-- - Example levers: timing of blood draws, temperatures, ... -->
-<!-- - Example outcome: observations that minimize the average prediction variance -->
+<!-- .center[ -->
+<!-- ```{r, squash-analysis-1-stats, out.width = 565, out.height = 300} -->
+<!-- knitr::include_graphics("./images/fiml_o2_stats.jpeg") -->
+<!-- ``` -->
+<!-- ] -->
 
-<!-- - Under CLC, measurements of patient awareness are gathered continuously (every 10-15 seconds) -->
-<!-- - Levers: infusion rates, or response targets that are translated into infusion rates -->
-<!-- - Outcome: clinical performance of CLC in heterogeneous population -->
+<!-- --- -->
+<!-- ## Analysis 1 - Time between assembly and verification date -->
 
-
-
-
-<!-- -------------------------------------------------------------------- -->
-<!-- -------------------------------------------------------------------- -->
-<!-- -------------------------------------------------------------------- -->
-
-<!-- # Paper 2 -->
-
-<!-- <!--  -->
-<!-- Outline  -->
-
-<!-- - Need for TCI and current dearth of software -->
-<!-- - Explain existence/possibility of alternate TCI algorithms, applied in different settings -->
-<!-- - Illustrate basic functionality  -->
-<!-- - Illustrate extension to PD model -->
-<!-- - Alternate TCI algorithm -->
-<!-- --> -->
+<!-- **Conclusion:** Claims after March 1, 2020 were processed more quickly **BUT**-- this was less pronounced when claims were marked as Covid-19 related. -->
 
 
+<!-- **Effect post March 1, 2020** -->
 
+<!-- full data: -0.482 [-0.491, -0.474]  -->
+<!-- p-squash: -0.483 [-0.491, -0.475]  -->
+<!-- e-squash: -0.466 [-0.475, -0.458]  -->
+<!-- sample: -0.506 [-0.572, -0.440] -->
+
+<!-- -- -->
+
+<!-- **Effect of Covid-19 related indicator** -->
+
+<!-- full data: 0.224 [0.196,0.254]  -->
+<!-- p-squash: 0.223 [0.193,0.252]  -->
+<!-- e-squash: 0.211 [0.182, 0.241]  -->
+<!-- sample: 0.264 [0.049, 0.480] -->
