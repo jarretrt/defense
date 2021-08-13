@@ -320,7 +320,8 @@ knitr::include_graphics("./images/objective_functions.jpeg")
 
 - "Predicted" patient parameters are based on observed covariates and updated as data are collected
 
---
+---
+## Simulation
 
 - Data are split into training set of $N_{\text{train}}=50$ patients used to identify optimal RF, and $N_{\text{test}}=72$ patients to evaluate performance
 
@@ -720,6 +721,10 @@ Create squashed data set with the same missingness patterns as the original data
 
 --
 
+- FIML used for missing values
+
+--
+
 - Tuning parameter: $\alpha = 1,1.5,2,\infty$
 
 ---
@@ -758,7 +763,7 @@ knitr::include_graphics("./images/sim_res_miss-3.jpeg")
 
 --
 
-- Creates a fully observed data set that preserves likelihood information
+- **Creates a fully observed data set that preserves likelihood information!**
 
 ---
 ## E-squashing
@@ -798,6 +803,10 @@ knitr::include_graphics("./images/cluster_plot2.jpeg")
 
 ---
 ## E-squashing
+
+- Pretend that we know regions
+
+--
 
 - Define region assignment operator, $\phi$, and region indicator, $Z$
 
@@ -931,7 +940,7 @@ knitr::include_graphics("./images/sim_res_missE.jpeg")
 
 --
 
-- Economic downturns usually impact the quantity and composition (fewer claims, more severe)
+- Economic downturns usually result in fewer, but more severe, claims
 
 .footnote[*KMPG,2020]
 --
@@ -992,7 +1001,7 @@ Research question:
 
 .center[
 ```{r, squash-analysis-2-fp, out.width = 633, out.height = 506}
-knitr::include_graphics("./images/ord_o2_fp.jpeg")
+knitr::include_graphics("./images/ord_model_fp.jpeg")
 ```
 ]
 
@@ -1002,18 +1011,18 @@ knitr::include_graphics("./images/ord_o2_fp.jpeg")
 
 .center[
 ```{r, squash-analysis-2-stats, out.width = 678, out.height = 360}
-knitr::include_graphics("./images/ord_o2_stats.jpeg")
+knitr::include_graphics("./images/ord_model_stats.jpeg")
 ```
 ]
 
 ---
 ## Ordinal analysis - Severity of workers' comp. claim
 
-**Conclusion:** Both claims marked as Covid-19 related and claims assembled March 1, 2020 tended to be associated with **less severe** outcomes
+**Conclusion:** Both claims marked as Covid-19 related and claims assembled after March 1, 2020 tended to be associated with **less severe** outcomes
 
 --
 
-**Effect post March 1, 2020**
+**Effect (on log-odds of increasing severity) post March 1, 2020**
 
 <small>
 
@@ -1047,7 +1056,7 @@ knitr::include_graphics("./images/ord_o2_stats.jpeg")
 ---
 ## Conclusions
 
-1. P-squashed estimates were highly similar to full-data estimates
+1. P-squashed estimates were highly similar to full-data estimates and had correct standard errors
 
 --
 
@@ -1056,15 +1065,6 @@ knitr::include_graphics("./images/ord_o2_stats.jpeg")
 --
 
 3. Both are viable options when working with large data with missing values, but more work is required
-
-
-
----
-# References
-
-Eleveld, D. J., Colin, P., Absalom, A. R., and Struys, M. M. R. F. (2018).  Pharmacokinetic-pharmacodynamic model for propofol for broad application in anaesthesia and sedation. British Journal of Anaesthesia, 120(5):942–959
-
-KPMG (2020), The Impact of COVID-19 on Workers’ Compensation, 1–34.
 
 
 ---
@@ -1081,6 +1081,14 @@ KPMG (2020), The Impact of COVID-19 on Workers’ Compensation, 1–34.
 - VU biostatistics students, staff, and faculty
 
 - Friends and family
+
+---
+# References
+
+Eleveld, D. J., Colin, P., Absalom, A. R., and Struys, M. M. R. F. (2018).  Pharmacokinetic-pharmacodynamic model for propofol for broad application in anaesthesia and sedation. British Journal of Anaesthesia, 120(5):942–959
+
+KPMG (2020), The Impact of COVID-19 on Workers’ Compensation, 1–34.
+
 
 ---
 # Questions?
